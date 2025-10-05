@@ -19,80 +19,77 @@ let computerScore = 0 // Computer score
 // =======================
 
 // Handle new deck creation
-function handleClick() {
-    fetch("https://apis.scrimba.com/deckofcards/api/deck/new/shuffle/")
-        .then(res => res.json())
-        .then(data => {
-            // Save deck ID for later draws
-            localStorage.setItem("deckId", data.deck_id)
-            deckId = data.deck_id
+async function handleClick() {
+    const res = await fetch("https://apis.scrimba.com/deckofcards/api/deck/new/shuffle/")
+    const data = await res.json()
+    // Save deck ID for later draws
+    localStorage.setItem("deckId", data.deck_id)
+    deckId = data.deck_id
 
-            // Reset scores and enable draw button
-            myScore = 0
-            computerScore = 0
-            draw.disabled = false
+    // Reset scores and enable draw button
+    myScore = 0
+    computerScore = 0
+    draw.disabled = false
 
-            // Display remaining cards
-            remainingText.textContent = `Remaining cards: ${data.remaining}`
-            winner.textContent = "Game of War!" // Reset winner display
-            imageContainer.innerHTML = ""       // Clear previous cards
-        })
+    // Display remaining cards
+    remainingText.textContent = `Remaining cards: ${data.remaining}`
+    winner.textContent = "Game of War!" // Reset winner display
+    imageContainer.innerHTML = ""       // Clear previous cards
 }
 
+
 // Handle drawing two cards
-function handleDoubleClick() {
+async function handleDoubleClick() {
     let savedDeckId = localStorage.getItem("deckId")
-    fetch(`https://apis.scrimba.com/deckofcards/api/deck/${savedDeckId}/draw/?count=2`)
-        .then(res => res.json())
-        .then(data => {
-            console.log(data)
+    const res = await fetch(`https://apis.scrimba.com/deckofcards/api/deck/${savedDeckId}/draw/?count=2`)
+    const data = await res.json()
 
-            // Disable draw button if deck is empty
-            draw.disabled = data.remaining === 0
+    // Disable draw button if deck is empty
+     draw.disabled = data.remaining === 0
 
-            // Update remaining cards display
-            remainingText.textContent = `Remaining cards: ${data.remaining}`
+    // Update remaining cards display
+    remainingText.textContent = `Remaining cards: ${data.remaining}`
 
-            // If no cards returned, exit early
-            if (!data.success || data.cards.length === 0) return
+    // If no cards returned, exit early
+    if (!data.success || data.cards.length === 0) return
 
-            // Extract drawn cards
-            const card1 = data.cards[0]
-            const card2 = data.cards[1]
+        // Extract drawn cards
+        const card1 = data.cards[0]
+        const card2 = data.cards[1]
 
-            // Determine winner of this round and update scores
-            const winnerText = determineWinner(card1, card2)
+        // Determine winner of this round and update scores
+        const winnerText = determineWinner(card1, card2)
 
-            // Build HTML to display drawn cards and current scores
-            let drawHtml = `
+        // Build HTML to display drawn cards and current scores
+        let drawHtml = `
                 <h4 class="turn">My Score: ${myScore}</h4>
                 <div class="card-container">
                     <img class="card" src=${card1.image} alt="First Deck-image"/>
                     <img class="card" src=${card2.image} alt="Second Deck-image"/>
                 </div>
                 <h4 class="turn">Computer Score: ${computerScore}</h4>
-            `
-            imageContainer.innerHTML = drawHtml
+        `
+        imageContainer.innerHTML = drawHtml
 
-            // Display round winner
-            winner.textContent = winnerText
+        // Display round winner
+        winner.textContent = winnerText
 
-            // If deck is empty, show final game result
-            if (data.remaining === 0) {
-                setTimeout(() => {
-                    imageContainer.innerHTML = `<h3 class="message">Shuffle Deck to continue...</h3>`
+        // If deck is empty, show final game result
+        if (data.remaining === 0) {
+            setTimeout(() => {
+                imageContainer.innerHTML = `<h3 class="message">Shuffle Deck to continue...</h3>`
 
-                    if (myScore > computerScore) {
-                        winner.textContent = `You Won the Game!`
-                    } else if (computerScore > myScore) {
-                        winner.textContent = `The Computer Won the Game!`
-                    } else {
-                        winner.textContent = `It's a Tie Game!`
-                    }
-                }, 500) // slight delay so last cards are visible
-            }
-        })
-}
+                if (myScore > computerScore) {
+                    winner.textContent = `You Won the Game!`
+                } else if (computerScore > myScore) {
+                    winner.textContent = `The Computer Won the Game!`
+                } else {
+                    winner.textContent = `It's a Tie Game!`
+                }
+            }, 500) // slight delay so last cards are visible
+        }
+    }
+
 
 // =======================
 // GAME LOGIC
